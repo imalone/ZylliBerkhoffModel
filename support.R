@@ -7,13 +7,13 @@ require(quanteda)
 filterChar <- function(x) { grepl("^[A-Za-zéèê0-9'-]+$",x)}
 stripChar <- function(x) { gsub("'|-","",x)}
 
-stripAndStem <- function(x) {wordstem(stripChar(x))}
+stripLowAndStem <- function(x) {tolower(wordstem(stripChar(x)))}
 
 #ngct4[as.list(rev(wordstem(unlist(stri_extract_all_words("adam sandlers")))))][,.(N=sum(N)),by=.(V2,V3,V4)][order(N)]
 
 # Return an input string processed for searching ngrams
 inputToTokens <- function(x) {
-  as.list(sapply(stri_extract_all_words(x), stripAndStem))
+  as.list(sapply(stri_extract_all_words(x), stripLowAndStem))
 }
 
 # Take list of tokens for match, return function that will match
@@ -40,8 +40,8 @@ backoffPredict <- function(inputTokens, ngList, nres=3) {
   ngind <- searchMax
   # Don't bother searching over ngrams that are longer than 1+our token length
   # They're suboptimal anyway as n>2 are filtered for sparsity
-  searchNg <- ngctL[1:searchMax]
-  allMatches <- lapply(ngctL, getRowMatches, inputTokens)
+  searchNg <- ngList[1:searchMax]
+  allMatches <- lapply(ngList, getRowMatches, inputTokens)
   needMatches <- nres
   while (needMatches > 0 && ngind > 0) {
     # get matches on ngList[ngind] and append up to length(matches) - nres
